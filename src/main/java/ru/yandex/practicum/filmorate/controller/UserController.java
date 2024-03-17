@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.UserDTO;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,21 +18,13 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController implements Controller<User> {
 
-    Map<Integer, User> users = new HashMap();
+    private Map<Integer, User> users = new HashMap();
     private static int id = 1;
 
-    @Override
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        if (user.getId() != null) {
-            throw new ValidationException("Пользователь с таким id уже существует!");
-        }
-        if (user.getName() == null) {
-            user = createUserWithEmptyName(user);
-        }
-
+    public User create(@Valid @RequestBody  UserDTO userDTO) {
+        User user = fromDTO(userDTO);
         validateUser(user);
-        user.setId(generateId());
         users.put(user.getId(), user);
 
         log.debug("Запрос на создание пользователя успешно обработан");
@@ -59,12 +52,14 @@ public class UserController implements Controller<User> {
         return new ArrayList<>(users.values());
     }
 
-    private User createUserWithEmptyName(User user) {
+    private User fromDTO(UserDTO userDTO) {
+        if (userDTO.getName() == null) userDTO.setName(userDTO.getLogin());
         return User.builder()
-                .login(user.getLogin())
-                .email(user.getEmail())
-                .name(user.getLogin())
-                .birthday(user.getBirthday())
+                .id(generateId())
+                .login(userDTO.getLogin())
+                .email(userDTO.getEmail())
+                .name(userDTO.getName())
+                .birthday(userDTO.getBirthday())
                 .build();
     }
 

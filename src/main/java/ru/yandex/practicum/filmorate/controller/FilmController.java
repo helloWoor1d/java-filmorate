@@ -2,9 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDTO;
+import ru.yandex.practicum.filmorate.dto.UserDTO;
 import ru.yandex.practicum.filmorate.exceptions.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -20,14 +23,10 @@ public class FilmController implements Controller<Film> {
     private static int id = 1;
     private Map<Integer, Film> films = new HashMap<>();
 
-    @Override
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
-        if (film.getId() != null) {
-            throw new ValidationException("Фильм с таким id уже существует!");
-        }
+    public Film create(@Valid @RequestBody FilmDTO filmDTO) {
+        Film film = fromDTO(filmDTO);
         validateFilm(film);
-        film.setId(generateID());
         films.put(film.getId(), film);
 
         log.debug("Запрос на добавление фильма успешно обработан", film);
@@ -52,6 +51,16 @@ public class FilmController implements Controller<Film> {
     @GetMapping
     public List<Film> getAll() {
         return new ArrayList<>(films.values());
+    }
+
+    private Film fromDTO(FilmDTO filmDTO) {
+        return Film.builder()
+                .id(generateID())
+                .name(filmDTO.getName())
+                .description(filmDTO.getDescription())
+                .releaseDate(filmDTO.getReleaseDate())
+                .duration(filmDTO.getDuration())
+                .build();
     }
 
     private int generateID() {

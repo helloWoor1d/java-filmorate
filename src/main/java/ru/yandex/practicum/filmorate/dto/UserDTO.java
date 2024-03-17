@@ -1,15 +1,17 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
 import lombok.*;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 @Builder
-@Data
-public class User {
-    private Integer id;
-
+public class UserDTO {
     @NotBlank(message = "Email не может быть пустым!")
     @Email(message = "Введен некорректный email!")
     private String email;
